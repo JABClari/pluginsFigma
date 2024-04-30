@@ -1,0 +1,80 @@
+<h1>Figma to Bareconnect</h1>
+
+<main>
+  <div>
+    <h3>Select a Frame on Canvas:</h3>
+    <!-- <p>Click on a frame directly on the canvas to select it.</p> -->
+  </div>
+  <div>
+
+    <button id="getFramesFromPage">Click to get Frames</button>
+    <div style="display: flex;gap:12px;align-items: center;">
+      <span>Total Frame for current Page: </span>
+      <p class="frameCount">0</p>
+    </div>
+    <div>
+      <h3>Select a Frame from Dropdown:</h3>
+      <select id="frameSelect">
+        <option disabled selected>Select Frame to Convert</option>
+      </select>
+    </div>
+  </div>
+  <button id="cancel">Cancel</button>
+</main>
+<script>
+  let currentFrameCount = 0;
+  document.getElementById('getFramesFromPage').onclick = (event) => {
+    parent.postMessage({
+      pluginMessage: {
+        type: 'getFrames'
+      }
+    }, '*');
+    // Message handling logic
+    onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (msg.type === 'FRAMES_LIST') {
+        const frames = msg.frameNames;
+        let frameCount = document.querySelector('.frameCount').textContent = frames.length.toString()
+        const select = document.getElementById('frameSelect');
+        if (currentFrameCount !== frames.length) {
+          currentFrameCount = frames.length;
+          // select.innerHTML = ''; // Clear existing options
+          // Remove existing options (except the default label)
+          while (select.options.length > 1) {
+                    select.remove(1);
+                }
+          frames.forEach((frame) => {
+            const option = document.createElement('option');
+            option.text = frame;
+            option.value = frame;
+            select.appendChild(option);
+          });
+        }
+
+      }
+    };
+  }
+
+  // Function to handle frame selection from dropdown
+  const selectFrame = () => {
+        const select = document.getElementById('frameSelect');
+        const selectedFrameName = select.value;
+
+        // Send message to the plugin with the selected frame name
+        parent.postMessage({ pluginMessage: { type: 'selectFrame', frameName: selectedFrameName } }, '*');
+    };
+ // Select dropdown change event listener
+ document.getElementById('frameSelect').onchange = selectFrame;
+
+
+
+
+
+  document.getElementById('cancel').onclick = (event) => {
+    parent.postMessage({
+      pluginMessage: {
+        type: 'actionExit'
+      }
+    }, '*');
+  }
+</script>
