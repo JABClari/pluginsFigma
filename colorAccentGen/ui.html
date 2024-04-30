@@ -1,0 +1,103 @@
+<h1>Color Tint Generator</h1>
+
+<form id="pluginForm">
+  <fieldset>
+    <legend>Color Information</legend>
+    <div class="form-group">
+      <label for="colorCode">Color</label>
+      <input type="color" id="colorCode" name="colorCode" value="#f3cd38"/>
+    </div>
+    <div class="form-group">
+      <label for="colorName">Color Name</label>
+      <input type="text" id="colorName" name="colorName" value="Primary">
+    </div>
+    <div class="form-group">
+      <label for="tintNumber">Number of tints</label>
+      <input type="number" value="10" min="1" max="10" id="tintNumber" name="tintNumber">
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>Frame Information</legend>
+    <div class="form-group">
+      <label for="circleSize">Circle Size</label>
+      <input type="number" min="48" value="120" id="circleSize" name="circleSize"/>
+    </div>
+    <div class="form-group">
+      <label for="circleSpacing">Circle Spacing</label>
+      <input type="number" min="4" value="32" id="circleSpacing" name="circleSpacing"/>
+    </div>
+    <div class="form-group">
+      <label>Choose frame orientation</label>
+      <div>
+        <input type="radio" name="direction" id="frameH" checked/>
+        <label for="frameH">Horizontal</label>
+      </div>
+      <div>
+        <input type="radio" name="direction" id="frameV"/>
+        <label for="frameV">Vertical</label>
+      </div>
+    </div>
+  </fieldset>
+  <input type="hidden" name="frameDirection" value="horizontal">
+
+  <div style="display: flex;margin-top:1rem;gap:12px;justify-content: space-between;">
+    <button id="cancel">Cancel</button>
+    <button id="generate">Generate Tints</button>
+  </div>
+</form>
+
+<style>
+  body{
+    font-family: 'Courier New', Courier, monospace;
+  }
+  h1{
+    font-size:28px;
+  }
+  fieldset{
+    margin-top:1rem;
+  }
+  .form-group{
+    margin-top:0.18rem;
+    display:flex;
+    flex-direction: column;
+    gap:4px;
+  }
+  label{
+    font-size: 14px;
+    font-weight: 500;
+
+  }
+  input:where([type="text"],[type="number"],[type="number"]){
+    border:2px solid #d8d8d8;
+    border-radius: 4px;
+    padding: 0.35rem;
+    font-weight: 500;
+  }
+</style>
+
+<script>
+  document.getElementById('generate').onclick = (event)=>{
+    let pluginForm  = document.querySelector('#pluginForm')
+    let pluginFormData =  new FormData(pluginForm);
+    
+    //Making sure we get the Frame direction
+    if(document.querySelector('#frameV').checked){
+      pluginFormData.set('frameDirection', 'vertical')
+    }
+
+    let formDataObject = {}
+     for (let [key,value] of pluginFormData){
+      formDataObject[key] = value;
+     }
+    
+
+    parent.postMessage(
+      { pluginMessage : {type:'actionGenerate', formDataObject} }, '*'
+    );
+  }
+  document.getElementById('cancel').onclick = (event)=>{
+    parent.postMessage(
+      { pluginMessage : {type:'actionExit'} }, '*'
+    );
+  }
+</script>
