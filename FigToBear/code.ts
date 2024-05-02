@@ -5,6 +5,17 @@ interface FrameDetails {
   hasGroups: boolean;
   elements: FrameElement[];
 }
+// Interface for text properties
+interface TextProperties {
+  alignment: 'LEFT' | 'CENTER' | 'RIGHT' | 'JUSTIFIED';
+  fontSize: any;
+  fontName: string;
+  fontWeight: any;
+  letterSpacing: any;
+  lineHeight: any;
+  color:any;
+}
+
 // Interface for frame Elements
 interface FrameElement {
   type: string;
@@ -12,8 +23,26 @@ interface FrameElement {
   color ? : SolidPaint;
   fillType ? : string;
   fillDetails?: any; // Define a specific type for fill details if needed
+  textProperties?: TextProperties; // Add this line
 }
+
+
+
 type GetNodeType = 'COMPONENT' | 'GROUP';
+
+
+// Function to generate JSON object with frame names
+function generateFrameNamesJSON(): any {
+  const frameNames: string[] = [];
+  figma.currentPage.findAll(node => {
+    if (node.type === 'FRAME') {
+      frameNames.push(node.name);
+    }
+    return false; // Return false to indicate that we don't want to stop the iteration
+  });
+  return { frameNames };
+}
+
 
 //Load the UI
 figma.showUI(__html__, {
@@ -29,6 +58,10 @@ figma.ui.onmessage = (msg) => {
   if (msg.type === 'getFrames') {
     const frames = figma.currentPage.findAll(node => node.type === 'FRAME');
     const frameNames = frames.map(frame => frame.name);
+    // Generate JSON object with frame names
+    const frameNamesJSON = generateFrameNamesJSON();
+    // Log the JSON object to the console
+    console.log(JSON.stringify(frameNamesJSON, null, 2));
     figma.ui.postMessage({
       type: 'FRAMES_LIST',
       frameNames
@@ -99,9 +132,20 @@ figma.ui.onmessage = (msg) => {
 
     function traverse(node: SceneNode): void {
       if (node.type === 'TEXT') {
+        const textNode = node as TextNode;
+        const textProperties: TextProperties = {
+          alignment: textNode.textAlignHorizontal,
+          fontSize: textNode.fontSize,
+          fontName: (textNode.fontName as FontName).family,
+          lineHeight: textNode.lineHeight,
+          letterSpacing: textNode.letterSpacing,
+          color: textNode.fills,
+          fontWeight: textNode.fontWeight,
+        };
         elements.push({
           type: 'TEXT',
-          text: (node as TextNode).characters
+          text: textNode.characters,
+          textProperties: textProperties
         });
       } else if (node.type === 'RECTANGLE') {
         const rectangle = node as RectangleNode;
@@ -117,7 +161,8 @@ figma.ui.onmessage = (msg) => {
             fillDetails = { color: (fill as SolidPaint).color };
             element = {
               type: 'RECTANGLE',
-              fillType:'Solid'
+              fillType:'Solid',
+              fillDetails
             };
           } else if (fill.type === 'GRADIENT_LINEAR' || fill.type === 'GRADIENT_RADIAL') {
             element = {
@@ -148,6 +193,10 @@ figma.ui.onmessage = (msg) => {
       } else if (node.type === 'ELLIPSE') {
         elements.push({
           type: 'ELLIPSE'
+        })
+      }else if (node.type === 'POLYGON') {
+        elements.push({
+          type: 'POLYGON'
         })
       }
       

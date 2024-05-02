@@ -58,7 +58,7 @@ figma.ui.onmessage = msg =>{
       const colorR = hexToRGB(colorCode).r/255,
             colorG = hexToRGB(colorCode).g/255,
             colorB = hexToRGB(colorCode).b/255
-
+ 
       //Color the layer
       tintNode.fills =[{type:'SOLID', color:{r:colorR,g:colorG,b:colorB}}]
 
