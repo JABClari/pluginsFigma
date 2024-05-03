@@ -41,13 +41,8 @@ figma.ui.onmessage = msg =>{
       
       //Size the layer
       tintNode.resize(parseInt(circleSize), parseInt(circleSize));
-
-      //Convert the HEX from our Color to RGB
       function hexToRGB(hex:any) {
-        // Remove '#' if present
         hex = hex.replace(/^#/, '');
-    
-        // Convert hex to RGB
         var r = parseInt(hex.substring(0, 2), 16);
         var g = parseInt(hex.substring(2, 4), 16);
         var b = parseInt(hex.substring(4, 6), 16);
